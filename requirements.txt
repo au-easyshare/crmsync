@@ -1,0 +1,6 @@
+argparse==1.2.1
+gearman==2.0.2
+-e git+ssh://git@github.com/au-easyshare/es_sqla.git@e51f19d1704803cd66bab21bb01670466d6b73f7#egg=es_sqla-master
+MySQL-python==1.2.5
+SQLAlchemy==1.0.2
+OERPLib==0.8.4
