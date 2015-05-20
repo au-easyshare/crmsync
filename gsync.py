@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import functools
 import ConfigParser
 import optparse
 import gearman
@@ -37,6 +36,5 @@ if __name__ == '__main__':
         sys.exit(1)
 
     gm_worker = gearman.GearmanWorker(mopts.gearman.split(','))
-    crm_task = CRMWorker()
-    gm_worker.register_task('gear_beta', functools.partial(CRMWorker.gm_task, crm_task))
+    crm_task = CRMWorker(options, gm_worker)
     gm_worker.work()

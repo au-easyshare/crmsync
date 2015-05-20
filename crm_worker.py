@@ -1,11 +1,13 @@
+import functools
 import json
 
 # gm_worker = gearman.GearmanWorker(['prod1.internal.easy-share.com.au'])
 
 
 class CRMWorker:
-    def __init__(self):
-        pass
+    def __init__(self, options, gm_worker):
+        gm_worker.register_task('gear_beta', functools.partial(CRMWorker.gm_task, self))
+
     def gm_task(self, gearman_worker, gearman_job):
         print 'job', gearman_job
         try:
