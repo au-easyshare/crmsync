@@ -1,5 +1,6 @@
 import functools
 import json
+import oerplib
 
 # gm_worker = gearman.GearmanWorker(['prod1.internal.easy-share.com.au'])
 
@@ -9,6 +10,8 @@ class CRMWorker:
     def __init__(self, options, gm_worker, session):
         gm_worker.register_task('gear_beta', functools.partial(CRMWorker.gm_task, self))
         self.session = session
+        self.oerp = oerplib.OERP(options.odoo_host, protocol=options.odoo_protocol, port=options.odoo_port)
+        self.erp_con = self.oerp.login(options.odoo_user, options.odoo_password, options.odoo_db)
 
     def gm_task(self, gearman_worker, gearman_job):
         print 'job', gearman_job
