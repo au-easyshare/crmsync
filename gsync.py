@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option("-f", "--config", dest="config", default='gsync.ini', help="config file")
     parser.add_option("-s", "--section", dest="section", default='beta', help="config file section")
-    parser.add_option("-t", "--test", dest="test", action="store_true", default=None, help="Send test")
+    parser.add_option("-t", "--test", dest="test", default=None, help="Send test")
     cmd_line_opts, args = parser.parse_args()
     config.readfp(open(cmd_line_opts.config))
 
@@ -35,7 +35,8 @@ if __name__ == '__main__':
 
     if mopts.test:
         client = gearman.GearmanClient(mopts.gearman.split(','))
-        jr = client.submit_job(mopts.service, mopts.test_data, background=True)
+        test_data = config.get('tests', mopts.test)
+        jr = client.submit_job(mopts.service, test_data, background=True)
         print "submitted some test data to ", mopts.service, ".. Exiting"
         sys.exit(1)
 

@@ -2,25 +2,46 @@ import functools
 import json
 import oerplib
 
+from es_sqla.model_schema import app
+import fmapper
+
 # gm_worker = gearman.GearmanWorker(['prod1.internal.easy-share.com.au'])
 
 # otable = {'user': puser}
 
 def handle_lead(jsd, crm):
-    p_obj = crm.oerp.get('res.partner')
     email = jsd['email']
-    es_users = p_obj.search([('email', '=', email)])
-    if not es_users:
-        # user_id for flase to make it unassigned
-        lead_id = crm.oerp.create('crm.lead', {'user_id': False, 'name': email, 'email': email, 'type': 'lead'})
+    es_lead = crm.lead_obj.search([('name', '=', email)])
+    if not es_lead:
+        # user_id for False to make it unassigned
+        crm.oerp.create('crm.lead', {'user_id': False, 'name': email, 'email_from': email, 'type': 'lead'})
 
-def handle_user(jsd, oerp):
-    pass
+def handle_user(jsd, crm):
+    id = jsd['id']
+    # first get the user, so we can change the lead to a user
+    user_details = crm.session.query(app.User, app.UserTerm, app.Household, app.HouseholdRent, app.TrustAccount, app.Address) \
+                      .outerjoin(app.UserTerm, app.UserTerm.user_id == app.User.id) \
+                      .outerjoin(app.Household, app.Household.id == app.UserTerm.household_id) \
+                      .outerjoin(app.HouseholdRent, app.HouseholdRent.household_id == app.Household.id) \
+                      .outerjoin(app.TrustAccount, app.Household.trust_account_id == app.TrustAccount.id) \
+                      .outerjoin(app.Address, app.Address.id == app.Household.address_id) \
+                      .filter(app.User.id == id).first()
+    es_lead = crm.lead_obj.search([('name', '=', user_details.User.email)])
+    if es_lead:
+        crm.oerp.unlink('crm.lead', es_lead)
+    rec_partner = fmapper.es_to_crm(user_details)      
+    fmapper.cru_es_user(crm, rec_partner, user_details)
 
 objects = {
     'lead': handle_lead,
     'user': handle_user
 }
+
+class Lex(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
 
 class CRMWorker:
     def __init__(self, options, gm_worker, session):
@@ -28,19 +49,21 @@ class CRMWorker:
         self.session = session
         self.oerp = oerplib.OERP(options.odoo_host, protocol=options.odoo_protocol, port=options.odoo_port)
         self.erp_con = self.oerp.login(options.odoo_user, options.odoo_password, options.odoo_db)
-        self.template_user_id = self.oerp.search('res.partner', [('name', '=', 'Template User')])[0]
-        self.template_user = self.oerp.read('res.partner', [self.template_user_id])
+        # self.template_user_id = self.oerp.search('res.partner', [('name', '=', 'Template User')])[0]
+        # self.template_user = self.oerp.read('res.partner', [self.template_user_id])
+        self.lead_obj = self.oerp.get('crm.lead')
+        self.partner_obj = self.oerp.get('res.partner')
 
     def gm_task(self, gearman_worker, gearman_job):
         print 'job', gearman_job
         try:
             jsd = json.loads(gearman_job.data)
             if 'object' not in jsd:
-                raise Exception("no 'object'")
+                raise Lex("no 'object'")
             if jsd['object'] not in objects:
-                raise Exception("unsupported object '%s'" % jsd['object'])
+                raise Lex("unsupported object '%s'" % jsd['object'])
             objects[jsd['object']](jsd, self)
-        except Exception as ee:
+        except Lex as ee:
             print "bad", str(ee)
             ret = json.dumps(dict(status='error', message=str(ee)))
         else:
