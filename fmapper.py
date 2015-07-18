@@ -23,7 +23,7 @@ field_map = {
     'es_trust_bsb': lambda oo: oo.TrustAccount.bank_bsb,
     'es_trust_ref': lambda oo: oo.TrustAccount.bank_ref_number,
     'es_user_id': lambda oo: oo.User.id,
-    'mobile': lambda oo: oo.User.contact_number_mob,
+    'phone': lambda oo: oo.User.contact_number_mob,
     'name': lambda oo: oo.User.first_name + ' ' + oo.User.last_name if oo.User.isperson == 'Y' else oo.User.company_name,
     'zip': lambda oo: sorn(oo.Address.postal_code),
     'street': lambda oo: oo.Address.unit_number + ' ' + oo.Address.street_address,

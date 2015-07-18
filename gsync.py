@@ -28,7 +28,7 @@ if __name__ == '__main__':
     config_defaults = {'odoo_host': 'localhost',
                        'odoo_protocol': 'xmlrpc',
                        'odoo_port': 8069,
-                       'odoo_user': 'rob@easy-share.com.au',
+                       'odoo_user': 'admin',
                        'odoo_db': 'easy1'}
 
     mopts = MagicOptions(config_defaults, dict(config.items(cmd_line_opts.section)), vars(cmd_line_opts))
@@ -36,6 +36,7 @@ if __name__ == '__main__':
     if mopts.test:
         client = gearman.GearmanClient(mopts.gearman.split(','))
         test_data = config.get('tests', mopts.test)
+        print "test data '%s'", test_data
         jr = client.submit_job(mopts.service, test_data, background=True)
         print "submitted some test data to ", mopts.service, ".. Exiting"
         sys.exit(1)
