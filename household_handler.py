@@ -1,7 +1,6 @@
 from es_sqla.model_schema import app
 
 def handle(jsd, crm):
-    from ipdb import set_trace; set_trace()
     user_id = jsd['id']['user']
     household_id = jsd['id']['household']
 

@@ -5,6 +5,8 @@ import oerplib
 from es_sqla.model_schema import app
 import fmapper
 
+import household_handler
+
 # gm_worker = gearman.GearmanWorker(['prod1.internal.easy-share.com.au'])
 
 # otable = {'user': puser}
@@ -34,7 +36,9 @@ def handle_user(jsd, crm):
 
 objects = {
     'lead': handle_lead,
-    'user': handle_user
+    'email': handle_lead,
+    'user': handle_user,
+    'household': household_handler.handle
 }
 
 class Lex(Exception):
