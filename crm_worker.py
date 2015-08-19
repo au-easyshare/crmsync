@@ -61,7 +61,7 @@ objects = {
     'lead': handle_lead,
     'email': handle_lead,
     'user': handle_user,
-    'household': household_handler.handle
+    'household': household_handler,
     'trust': handle_trust
 }
 
