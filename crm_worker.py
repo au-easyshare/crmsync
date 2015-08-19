@@ -71,11 +71,10 @@ class Lex(Exception):
 
 
 class CRMWorker:
-    def __init__(self, options, gm_worker, session):
+    def __init__(self, options, gm_worker, session, oerp):
         gm_worker.register_task('gear_beta', functools.partial(CRMWorker.gm_task, self))
         self.session = session
-        self.oerp = oerplib.OERP(options.odoo_host, protocol=options.odoo_protocol, port=options.odoo_port)
-        self.erp_con = self.oerp.login(options.odoo_user, options.odoo_password, options.odoo_db)
+        self.oerp = oerp
         # self.template_user_id = self.oerp.search('res.partner', [('name', '=', 'Template User')])[0]
         # self.template_user = self.oerp.read('res.partner', [self.template_user_id])
         self.lead_obj = self.oerp.get('crm.lead')
