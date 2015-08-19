@@ -1,6 +1,7 @@
 import datetime
 
-def sorn(inval):
+
+def string_or_nope(inval):
     if inval:
         return str(inval)
     else:
@@ -14,18 +15,21 @@ field_map = {
     'city': lambda oo: oo.Address.suburb,
     'customer': lambda oo: True,
     'email': lambda oo: oo.User.email,
-    'es_act_date': lambda oo: sorn(oo.User.account_activation_date),
-    'es_hh_setup': lambda oo: True if oo.Household.is_setup == 'Y' else False,
-    'es_lease_start': lambda oo: sorn(oo.Household.lease_period_start),
-    'es_pm_method': lambda oo: oo.User.payment_method,
-    'es_rego_date': lambda oo: sorn(oo.User.registration_date),
+    'es_user_id': lambda oo: oo.User.id,
+    'es_household_id': lambda oo: oo.Household.id,
+    'es_household_rent_id': lambda oo: oo.HouseholdRent.id,
+    'es_user_term_id': lambda oo: oo.UserTerm.id,
     'es_site': lambda oo: oo.User.user_type,
+    'es_act_date': lambda oo: string_or_nope(oo.User.account_activation_date),
+    'es_hh_setup': lambda oo: True if oo.Household.is_setup == 'Y' else False,
+    'es_lease_start': lambda oo: string_or_nope(oo.Household.lease_period_start),
+    'es_pm_method': lambda oo: oo.User.payment_method,
+    'es_rego_date': lambda oo: string_or_nope(oo.User.registration_date),
     'es_trust_bsb': lambda oo: oo.TrustAccount.bank_bsb,
     'es_trust_ref': lambda oo: oo.TrustAccount.bank_ref_number,
-    'es_user_id': lambda oo: oo.User.id,
     'phone': lambda oo: oo.User.contact_number_mob,
     'name': lambda oo: oo.User.first_name + ' ' + oo.User.last_name if oo.User.isperson == 'Y' else oo.User.company_name,
-    'zip': lambda oo: sorn(oo.Address.postal_code),
+    'zip': lambda oo: string_or_nope(oo.Address.postal_code),
     'street': lambda oo: oo.Address.unit_number + ' ' + oo.Address.street_address,
     'street2': lambda oo: oo.Address.state,
     'type': lambda oo: 'contact',
