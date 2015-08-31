@@ -92,7 +92,6 @@ def sync(app_session, oerp):
                     same += 1
                     continue
 
-                from IPython import embed; embed()
                 print "Update field '%s' value '%s' crm '%s'" % (field, str(value), crm_val)
                 print "es user", res.User.id, "orm user ", user.id
                 #if field is 'es_household_rent_id':
