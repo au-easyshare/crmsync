@@ -1,31 +1,20 @@
 import datetime
+from sqlalchemy import or_
 from es_sqla.model_schema import app
-from sqlalchemy import func
 
 from fmapper import field_map
 
 
 def sync(app_session, oerp):
-    # these maxes are not correct. They should check that the row is the 'current' terms based on the dates
-    # not the maximum.
-    max_term = app_session.query(app.UserTerm.household_id, app.UserTerm.user_id, app.UserTerm.id.label('term_id'),
-                                 func.max(app.UserTerm.term_start).label('userterm_term_start')) \
-                          .group_by(app.UserTerm.user_id).subquery()
-
-    max_household_rent = app_session.query(app.HouseholdRent.household_id,
-                                               app.HouseholdRent.id.label('household_rent_id'),
-                                               func.max(app.HouseholdRent.date_term_start).label('householdrent_term_start')) \
-                                        .group_by(app.HouseholdRent.household_id).subquery()
-
-
-    qry = app_session.query(app.User, app.Household, app.TrustAccount, app.Address,
-            max_household_rent.c.household_id, max_household_rent.c.household_rent_id, 
-                            max_term.c.household_id, max_term.c.term_id, max_term.c.userterm_term_start) \
-                     .outerjoin(max_term, max_term.c.user_id == app.User.id) \
-                     .outerjoin(app.Household, app.Household.id == max_term.c.household_id) \
-                     .outerjoin(max_household_rent, max_household_rent.c.household_id == app.Household.id) \
-                     .outerjoin(app.TrustAccount, app.Household.trust_account_id == app.TrustAccount.id) \
-                     .outerjoin(app.Address, app.Address.id == app.Household.address_id)
+    start_date = datetime.date.today() - datetime.timedelta(days=1)
+    qry = app_session.query(app.UserTerm, app.User, app.Household, app.HouseholdRent, app.TrustAccount, app.Address) \
+                   .join(app.Household, app.UserTerm.household_id == app.Household.id) \
+                   .join(app.User, app.UserTerm.user_id == app.User.id) \
+                   .join(app.Address, app.Household.address_id == app.Address.id) \
+                   .outerjoin(app.TrustAccount, app.Household.trust_account_id == app.TrustAccount.id) \
+                   .outerjoin(app.HouseholdRent, app.Household.id == app.HouseholdRent.household_id) \
+                   .filter(or_(app.UserTerm.term_end == None, app.UserTerm.term_end >= start_date)) \
+                   .filter(or_(app.HouseholdRent.date_term_end == None, app.HouseholdRent.date_term_end >= start_date))
 
 
     product_name_to_id = dict([(ii.code, ii.id) for ii in oerp.get('product.product') if ii.code])
