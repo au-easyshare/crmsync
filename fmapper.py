@@ -17,7 +17,7 @@ field_map = {
     'email': lambda oo: oo.User.email,
     'es_user_id': lambda oo: oo.User.id,
     'es_household_id': lambda oo: oo.Household.id,
-    'es_household_rent_id': lambda oo: oo.HouseholdRent.id,
+    'es_household_rent_id': lambda oo: oo.household_rent_id,
     'es_user_term_id': lambda oo: oo.term_id,
     'es_site': lambda oo: oo.User.user_type,
     'es_act_date': lambda oo: string_or_nope(oo.User.account_activation_date),
