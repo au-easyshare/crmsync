@@ -28,6 +28,7 @@ def sync(app_session, oerp):
         es_user_term = p_obj.search([('es_user_term_id', '=', res.UserTerm.id)])
 
         rec_partner = dict()
+        print "term", res.UserTerm.id
         for field, mapper in field_map.iteritems():
             if mapper is None:  # a field we want to get but not set
                 continue
@@ -83,7 +84,6 @@ def sync(app_session, oerp):
 
                 print "Update field '%s' value '%s' crm '%s'" % (field, str(value), crm_val)
                 print "es user_term", res.User.id, "orm user_term ", user_term.id
-                from ipdb import set_trace; set_trace()
                 #if field is 'es_household_rent_id':
                 #    from IPython import embed; embed()
                 setattr(user_term, field, value)
