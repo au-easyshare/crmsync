@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_option("-s", "--section", dest="section", default='beta', help="config file section")
     parser.add_option("-t", "--test", dest="test", default=None, help="Send test")
     parser.add_option("-S", "--sync", dest="sync", default=None,  action="store_true", help="Sync all user data")
+    parser.add_option("-d", "--date", dest="date", default=None, help="from activation date")
     cmd_line_opts, args = parser.parse_args()
     config.readfp(open(cmd_line_opts.config))
 
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 
     if mopts.sync:
         print "Sync"
-        sync(make_session(), oerp)
+        sync(make_session(), oerp, mopts)
         sys.exit(1)
 
     gm_worker = gearman.GearmanWorker(mopts.gearman.split(','))

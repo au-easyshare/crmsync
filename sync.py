@@ -8,7 +8,7 @@ from es_sqla.model_schema import app
 from fmapper import field_map
 
 
-def sync(app_session, oerp):
+def sync(app_session, oerp, mopts):
     start_date = datetime.date.today() - datetime.timedelta(days=1)
     qry = app_session.query(app.UserTerm, app.User, app.Household, app.HouseholdRent, app.TrustAccount, app.Address) \
                    .join(app.Household, app.UserTerm.household_id == app.Household.id) \
@@ -16,9 +16,11 @@ def sync(app_session, oerp):
                    .join(app.Address, app.Household.address_id == app.Address.id) \
                    .outerjoin(app.TrustAccount, app.Household.trust_account_id == app.TrustAccount.id) \
                    .outerjoin(app.HouseholdRent, app.Household.id == app.HouseholdRent.household_id) \
-                   .filter(or_(app.UserTerm.term_end == None, app.UserTerm.term_end >= start_date)) \
-                   .filter(or_(app.HouseholdRent.date_term_end == None, app.HouseholdRent.date_term_end >= start_date))
 
+    # .filter(or_(app.UserTerm.term_end == None, app.UserTerm.term_end >= start_date)) \
+    # .filter(or_(app.HouseholdRent.date_term_end == None, app.HouseholdRent.date_term_end >= start_date))
+    if mopts.date:
+        qry = qry.filter(app.User.account_activation_date >= datetime.datetime.strptime(mopts.date, '%Y%m%d'))
 
     product_name_to_id = dict([(ii.code, ii.id) for ii in oerp.get('product.product') if ii.code])
     p_obj = oerp.get('res.partner')
@@ -31,7 +33,7 @@ def sync(app_session, oerp):
         es_user_term = p_obj.search([('es_user_term_id', '=', res.UserTerm.id)])
 
         rec_partner = dict()
-        print "term", res.UserTerm.id
+        print "user", res.User.first_name + ' ' + res.User.last_name if res.User.isperson == 'Y' else res.User.company_name
         for field, mapper in field_map.iteritems():
             if mapper is None:  # a field we want to get but not set
                 continue
