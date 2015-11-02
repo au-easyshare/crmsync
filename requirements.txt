@@ -3,3 +3,4 @@ gearman==2.0.2
 MySQL-python==1.2.5
 SQLAlchemy==1.0.2
 OERPLib==0.8.4
+python-dateutil==2.4.2
