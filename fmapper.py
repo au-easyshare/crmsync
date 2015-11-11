@@ -35,6 +35,7 @@ field_map = {
     'es_lease_start': lambda oo: string_or_nope(oo.Household.lease_period_start),
     'es_pm_method': lambda oo: oo.User.payment_method,
     'es_rego_date': lambda oo: fmt_datetime(oo.User.registration_date),
+    'es_trust_account_id': lambda oo: oo.TrustAccount.id,
     'es_trust_bsb': lambda oo: oo.TrustAccount.bank_bsb,
     'es_trust_ref': lambda oo: oo.TrustAccount.bank_ref_number,
     'phone': lambda oo: oo.User.contact_number_mob,
